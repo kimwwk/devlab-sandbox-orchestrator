@@ -1,0 +1,10 @@
+FROM ghcr.io/agent-infra/sandbox:latest
+
+# Install Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code
+
+# Ensure latest npm
+RUN npm install -g npm@latest
+
+# Useful tools
+RUN apt-get update && apt-get install -y jq && rm -rf /var/lib/apt/lists/*

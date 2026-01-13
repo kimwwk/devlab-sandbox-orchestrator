@@ -1,0 +1,22 @@
+name: our-pot-app
+repo: https://github.com/kimwwk/our-pot-app.git
+toolchain: node
+
+# Agent to use
+agent: developer
+
+# Task to execute
+task: |
+  Use the Linear MCP tools to list teams and report what you find.
+
+# Optional overrides
+model: sonnet
+port: 8888
+
+# MCP servers override - using API key auth via header
+mcp_servers:
+  linear:
+    command: "npx"
+    args: ["-y", "mcp-remote", "https://mcp.linear.app/mcp", "--header", "Authorization:${AUTH_HEADER}"]
+    env:
+      AUTH_HEADER: "Bearer YOUR_LINEAR_API_KEY_HERE"

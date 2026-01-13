@@ -1,0 +1,12 @@
+[project]
+name = "devlab"
+version = "0.1.0"
+description = "Runtime Orchestrator for AI agents"
+requires-python = ">=3.10"
+dependencies = [
+    "python-dotenv>=1.2.1",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+devlab = "cli:main"
