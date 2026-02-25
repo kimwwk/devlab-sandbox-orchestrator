@@ -13,9 +13,9 @@ import sys
 from dotenv import load_dotenv
 load_dotenv()
 
-from orchestrator import run_from_file
-from layers.build import build_image, list_images, get_image_tag, image_exists
-from layers.start import stop_container, is_running
+from .orchestrator import run_from_file
+from .layers.build import build_image, list_images, get_image_tag, image_exists
+from .layers.start import stop_container, is_running
 
 
 def cmd_run(args: argparse.Namespace) -> int:

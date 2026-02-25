@@ -2,11 +2,32 @@
 
 from typing import Any
 
-from config import load_project, get_agent, get_env_vars
-from config.agents import merge_agent_config
-from layers import build_image, start_container, stop_container, is_running
-from layers.build import get_image_tag
-from layers.exec import clone_repo, setup_mcp, invoke_agent
+from .config import load_project, get_agent, get_env_vars
+from .config.agents import merge_agent_config
+from .layers import build_image, start_container, stop_container, is_running
+from .layers.build import get_image_tag
+from .layers.exec import clone_repo, setup_mcp, invoke_agent
+from . import callback
+
+
+def compose_task_prompt(project_config: dict[str, Any]) -> str:
+    """Compose the task prompt for the agent.
+
+    If linear_issue is specified, compose a role-appropriate structured prompt.
+    Otherwise, use the literal task field.
+
+    Args:
+        project_config: Project configuration from YAML
+
+    Returns:
+        Task prompt string
+    """
+    linear_issue = project_config.get("linear_issue")
+    if linear_issue:
+        from .prompts.linear import compose_linear_prompt
+        agent_role = project_config.get("agent", "developer")
+        return compose_linear_prompt(linear_issue, agent_role)
+    return project_config["task"]
 
 
 def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
@@ -31,7 +52,7 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
     name = project_config["name"]
     repo = project_config["repo"]
     toolchain = project_config["toolchain"]
-    task = project_config["task"]
+    task = compose_task_prompt(project_config)
     port = project_config.get("port", 8888)
 
     # Get environment variables
@@ -101,6 +122,12 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
                 print(f"Cost: ${result['total_cost_usd']:.4f}")
             if result.get("duration_ms"):
                 print(f"Duration: {result['duration_ms'] / 1000:.1f}s")
+
+        # Notify on completion
+        notify_config = project_config.get("notify")
+        if notify_config:
+            print("\n=== Notify ===")
+            callback.notify(notify_config, project_config, result)
 
         return result
 

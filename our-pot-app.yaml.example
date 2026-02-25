@@ -1,19 +1,63 @@
-name: our-pot-app
-repo: https://github.com/kimwwk/our-pot-app.git
-toolchain: node
+# ============================================================
+# DevLab Project Config — Reference for Forge
+# ============================================================
+# Forge: use this as a template when creating YAML configs
+# for dispatching Claude Code agents via `devlab run`.
+#
+# Required fields: name, repo, and one of (linear_issue | task)
+# Everything else has sensible defaults.
+# ============================================================
 
-# Agent to use
+# --- Required ---
+
+# Project identifier (used for container naming: devlab-<name>)
+name: our-pot-app
+
+# Git repository URL (must be cloneable; private repos need GITHUB_TOKEN in .env)
+repo: https://github.com/kimwwk/our-pot-app.git
+
+# --- Task Source (pick one) ---
+
+# Option A: Linear issue — agent fetches issue, does work, posts comment, updates status
+linear_issue: "OUR-123"
+
+# Option B: Literal task — agent receives this text as its prompt
+# task: |
+#   Describe what the agent should do here.
+#   Can be multi-line.
+
+# --- Agent Role ---
+# Available: developer, qa, reviewer
+# - developer: full access, creates feature branch + PR (default)
+# - qa: test-only, writes tests, cannot modify source code
+# - reviewer: read-only, provides code review feedback
 agent: developer
 
-# Task to execute
-task: |
-  Use the Linear MCP tools to list teams and report what you find.
+# --- Optional Overrides ---
 
-# Optional overrides
+# Model: haiku, sonnet, opus (default: agent's default, usually sonnet)
 model: sonnet
+
+# Toolchain: node, python, fullstack (default: node)
+# Determines which Docker image to use
+toolchain: node
+
+# Host port mapped to container's 8080 (default: 8888)
+# Access VNC at http://localhost:<port>/vnc/index.html
+# Access VSCode at http://localhost:<port>/code-server/
 port: 8888
 
-# MCP servers override - using API key auth via header
+# --- Notification ---
+# Webhook called when task completes (for Forge's build loop)
+notify:
+  webhook: http://192.168.101.130:5678/webhook/devlab-task-done
+  channels:
+    - telegram
+    - slack
+
+# --- MCP Servers ---
+# Override or extend the agent's default MCP servers.
+# Linear MCP is required when using linear_issue.
 mcp_servers:
   linear:
     command: "npx"

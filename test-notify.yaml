@@ -1,0 +1,16 @@
+name: test-notify
+repo: https://github.com/kimwwk/our-pot-app.git
+toolchain: node
+
+agent: developer
+
+task: |
+  List the files in the root of this project and summarize what this project is about in 2 sentences. That's it, nothing else.
+
+model: haiku
+port: 8889
+
+notify:
+  webhook: http://192.168.101.130:5678/webhook/devlab-task-done
+  channels:
+    - slack

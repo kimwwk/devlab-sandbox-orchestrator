@@ -9,4 +9,14 @@ dependencies = [
 ]
 
 [project.scripts]
-devlab = "cli:main"
+devlab = "devlab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+devlab = ["images/*"]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"

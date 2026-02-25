@@ -28,10 +28,14 @@ def load_project(config_path: str) -> dict[str, Any]:
         config = yaml.safe_load(f)
 
     # Validate required fields
-    required = ["name", "repo", "task"]
+    required = ["name", "repo"]
     missing = [f for f in required if f not in config]
     if missing:
         raise ValueError(f"Missing required fields: {missing}")
+
+    # Validate task source: either task or linear_issue
+    if "task" not in config and "linear_issue" not in config:
+        raise ValueError("Either 'task' or 'linear_issue' must be specified")
 
     # Set defaults
     config.setdefault("toolchain", "node")
@@ -39,6 +43,9 @@ def load_project(config_path: str) -> dict[str, Any]:
     config.setdefault("model", None)  # Use agent default
     config.setdefault("mcp_servers", None)  # Use agent default
     config.setdefault("port", 8888)
+    config.setdefault("task", None)
+    config.setdefault("linear_issue", None)
+    config.setdefault("notify", None)
 
     return config
 
@@ -54,11 +61,17 @@ def get_env_vars() -> dict[str, str]:
     """
     env = {}
 
-    # Required
+    # Required: either ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN
     api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise ValueError("ANTHROPIC_API_KEY environment variable not set")
-    env["ANTHROPIC_API_KEY"] = api_key
+    oauth_token = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")
+    if not api_key and not oauth_token:
+        raise ValueError(
+            "Either ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN must be set"
+        )
+    if api_key:
+        env["ANTHROPIC_API_KEY"] = api_key
+    if oauth_token:
+        env["CLAUDE_CODE_OAUTH_TOKEN"] = oauth_token
 
     # Optional but recommended for private repos
     github_token = os.environ.get("GITHUB_TOKEN")
