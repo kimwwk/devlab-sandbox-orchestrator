@@ -1,4 +1,4 @@
-"""Agent prompt templates for Linear-driven task execution."""
+"""Agent prompt templates."""
 
 from .linear import compose_linear_prompt
 

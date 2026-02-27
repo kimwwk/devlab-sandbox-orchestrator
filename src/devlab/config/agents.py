@@ -69,6 +69,16 @@ AGENTS: dict[str, dict[str, Any]] = {
         "hooks": None,
         "system_prompt_append": "You are a code reviewer. Analyze the code and provide feedback. Do not make any changes.",
     },
+    "analyst": {
+        "name": "analyst",
+        "description": "Analysis orchestrator for protocol-driven multi-agent workflows",
+        "model": "sonnet",
+        "tools": None,
+        "disallowed_tools": None,
+        "mcp_servers": None,
+        "hooks": None,
+        "system_prompt_append": None,
+    },
 }
 
 

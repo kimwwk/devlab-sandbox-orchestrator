@@ -1,4 +1,6 @@
 google-chrome-stable_current_amd64.deb
 .env
 __pycache__
-our-pot-app.yaml
+yaml-templates/*
+!yaml-templates/*.example
+!yaml-templates/test-*

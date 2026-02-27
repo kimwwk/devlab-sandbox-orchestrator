@@ -133,6 +133,7 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
             setup_mcp(container_name, agent["mcp_servers"])
 
         # Invoke agent
+        timeout = project_config.get("timeout", 600)
         result = invoke_agent(
             container=container_name,
             task=task,
@@ -140,6 +141,7 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
             tools=agent.get("tools"),
             disallowed_tools=agent.get("disallowed_tools"),
             mcp_config_path="/home/gem/.claude/mcp.json" if agent.get("mcp_servers") else None,
+            timeout=timeout,
         )
 
         print("\n=== Result ===")

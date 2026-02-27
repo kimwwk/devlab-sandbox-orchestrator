@@ -1,0 +1,29 @@
+# ============================================================
+# DevLab Project Config — Idea Grooming: Founder
+# ============================================================
+# Dispatches the Founder agent to evaluate a new idea.
+# The agent reads its own instructions from the cloned repo.
+# ============================================================
+
+# --- Required ---
+name: founder-prior-art-search
+repo: https://github.com/kimwwk/idea-grooming.git
+
+# --- Task ---
+task: |
+  You are the Founder agent. Read your full instructions at .claude/agents/founder.md and follow them.
+
+  Idea folder: prior-art-search/
+  State: new-idea
+  GitHub issue: #43 in kimwwk/idea-grooming
+
+  Execute your role. Commit and push when done.
+
+# --- Agent Role ---
+# analyst: full access, no browser, no system prompt — agent reads its own instructions
+agent: analyst
+
+# --- Overrides ---
+model: sonnet
+toolchain: node
+timeout: 1200

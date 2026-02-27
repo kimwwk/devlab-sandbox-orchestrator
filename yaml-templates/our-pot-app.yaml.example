@@ -27,10 +27,11 @@ linear_issue: "OUR-123"
 #   Can be multi-line.
 
 # --- Agent Role ---
-# Available: developer, qa, reviewer
-# - developer: full access, creates feature branch + PR (default)
-# - qa: test-only, writes tests, cannot modify source code
+# Available: developer, qa, reviewer, analyst
+# - developer: full access + browser, creates feature branch + PR (default)
+# - qa: test-only + browser, writes tests, cannot modify source code
 # - reviewer: read-only, provides code review feedback
+# - analyst: full access, no browser — reads its own instructions from the repo
 agent: developer
 
 # --- Optional Overrides ---
