@@ -1,0 +1,15 @@
+# Test: verify triggered_by routes to correct Slack channel
+name: test-triggered-by
+repo: https://github.com/kimwwk/idea-grooming.git
+toolchain: node
+agent: analyst
+model: haiku
+timeout: 120
+port: 9999
+task: |
+  List the files in the root of this project and summarize what this project is about in 2 sentences. That's it, nothing else.
+notify:
+  webhook: http://192.168.101.130:5678/webhook/devlab-task-done
+  channels:
+    - slack
+  triggered_by: Forge

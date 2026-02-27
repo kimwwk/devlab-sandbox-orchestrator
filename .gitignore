@@ -1,5 +1,6 @@
 google-chrome-stable_current_amd64.deb
 .env
+.env.production
 __pycache__
 yaml-templates/*
 !yaml-templates/*.example
