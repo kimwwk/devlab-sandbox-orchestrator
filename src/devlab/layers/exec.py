@@ -3,7 +3,6 @@
 import json
 import subprocess
 from typing import Any, Optional
-from urllib.parse import urlparse
 
 
 def _docker_exec(
@@ -39,35 +38,68 @@ def _docker_exec(
     )
 
 
+def configure_git(
+    container: str,
+    token: Optional[str] = None,
+    user_name: str = "devlab-agent",
+    user_email: str = "devlab-agent@noreply.github.com",
+) -> None:
+    """Configure git credentials and identity inside container.
+
+    Sets up the credential store, git identity, and gh CLI auth
+    in a single docker exec call.
+
+    Args:
+        container: Container name
+        token: GitHub token for credential store and gh auth
+        user_name: Git commit author name
+        user_email: Git commit author email
+    """
+    lines = [
+        f'git config --global user.name "{user_name}"',
+        f'git config --global user.email "{user_email}"',
+    ]
+
+    if token:
+        lines.extend([
+            'echo "https://x-access-token:${GITHUB_TOKEN}@github.com" > ~/.git-credentials',
+            "git config --global credential.helper store",
+            'echo "${GITHUB_TOKEN}" | gh auth login --with-token 2>/dev/null || true',
+        ])
+
+    result = _docker_exec(container, " && ".join(lines))
+
+    if result.returncode != 0:
+        print(f"Git config warning: {result.stderr.strip()}")
+    elif token:
+        print("Git configured: credentials, identity, gh CLI")
+    else:
+        print("Git configured: identity only (no token)")
+
+
 def clone_repo(
     container: str,
     repo_url: str,
-    token: Optional[str] = None,
     path: str = "/home/gem/project",
 ) -> None:
     """Clone a git repository inside the container.
 
+    Relies on configure_git() having set up the credential helper
+    so no token injection into the URL is needed.
+
     Args:
         container: Container name
         repo_url: Repository URL (https://github.com/owner/repo.git)
-        token: GitHub token for private repos
         path: Destination path inside container
 
     Raises:
         RuntimeError: If clone fails
     """
-    # Inject token into URL for private repos
-    if token:
-        parsed = urlparse(repo_url)
-        auth_url = f"{parsed.scheme}://{token}@{parsed.netloc}{parsed.path}"
-    else:
-        auth_url = repo_url
-
     # Remove existing directory if present
     _docker_exec(container, f"rm -rf {path}")
 
     print(f"Cloning {repo_url} to {path}...")
-    result = _docker_exec(container, f"git clone {auth_url} {path}")
+    result = _docker_exec(container, f"git clone {repo_url} {path}")
 
     if result.returncode != 0:
         raise RuntimeError(f"Failed to clone repo: {result.stderr}")

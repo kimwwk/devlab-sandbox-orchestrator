@@ -6,8 +6,29 @@ from .config import load_project, get_agent, get_env_vars
 from .config.agents import merge_agent_config
 from .layers import build_image, start_container, stop_container, is_running
 from .layers.build import get_image_tag
-from .layers.exec import clone_repo, setup_mcp, invoke_agent
+from .layers.exec import configure_git, clone_repo, setup_mcp, invoke_agent
 from . import callback
+
+REPORT_INSTRUCTION = """
+
+<completion-report>
+When you finish, end with a brief completion report in this exact format:
+
+## Status
+DONE or BLOCKED (one word)
+
+## What Changed
+- List each file changed and what was done (1 line per file)
+
+## Key Decisions
+- Any non-obvious choices you made and why (skip if none)
+
+## PR / Branch
+- Branch name and PR link if created (skip if none)
+
+Keep the report concise — a few bullet points, not paragraphs.
+</completion-report>
+"""
 
 
 def compose_task_prompt(project_config: dict[str, Any]) -> str:
@@ -26,8 +47,11 @@ def compose_task_prompt(project_config: dict[str, Any]) -> str:
     if linear_issue:
         from .prompts.linear import compose_linear_prompt
         agent_role = project_config.get("agent", "developer")
-        return compose_linear_prompt(linear_issue, agent_role)
-    return project_config["task"]
+        prompt = compose_linear_prompt(linear_issue, agent_role)
+    else:
+        prompt = project_config["task"]
+
+    return prompt + REPORT_INSTRUCTION
 
 
 def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
@@ -92,11 +116,16 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
         # Layer 3: Exec
         print("\n=== Layer 3: Exec ===")
 
+        # Git auth + identity
+        configure_git(
+            container=container_name,
+            token=env.get("GITHUB_TOKEN"),
+        )
+
         # Clone repo
         clone_repo(
             container=container_name,
             repo_url=repo,
-            token=env.get("GITHUB_TOKEN"),
         )
 
         # Setup MCP

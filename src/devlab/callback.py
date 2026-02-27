@@ -29,6 +29,17 @@ def notify(notify_config: dict[str, Any], project_config: dict[str, Any], result
     channels = notify_config.get("channels", ["telegram", "slack"])
     is_error = result.get("is_error", False)
 
+    # Format numbers cleanly
+    cost = result.get("total_cost_usd")
+    cost_str = f"{cost:.2f}" if cost else "?"
+
+    duration_ms = result.get("duration_ms")
+    if duration_ms:
+        secs = duration_ms / 1000
+        duration_str = f"{secs / 60:.1f}m" if secs >= 60 else f"{secs:.0f}s"
+    else:
+        duration_str = "?"
+
     payload = {
         "channels": channels,
         "task_name": project_config.get("name", "unknown"),
@@ -36,9 +47,9 @@ def notify(notify_config: dict[str, Any], project_config: dict[str, Any], result
         "agent": project_config.get("agent", "developer"),
         "model": result.get("model") or project_config.get("model", "sonnet"),
         "status": "failed" if is_error else "done",
-        "cost_usd": result.get("total_cost_usd"),
-        "duration_seconds": round(result.get("duration_ms", 0) / 1000, 1) if result.get("duration_ms") else None,
-        "result_summary": _truncate(result.get("result", ""), 1000),
+        "cost_usd": cost_str,
+        "duration": duration_str,
+        "result_summary": _truncate(result.get("result", ""), 300),
     }
 
     return _post(webhook_url, payload)
