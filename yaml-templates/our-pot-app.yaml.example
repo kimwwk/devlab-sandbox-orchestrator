@@ -49,12 +49,15 @@ toolchain: node
 port: 8888
 
 # --- Notification ---
-# Webhook called when task completes (for Forge's build loop)
+# Webhook called when task completes
 notify:
   webhook: http://192.168.101.130:5678/webhook/devlab-task-done
   channels:
     - telegram
     - slack
+  # Who triggered this dispatch (default: Forge)
+  # n8n routes Slack messages to different channels based on this value
+  triggered_by: Forge
 
 # --- MCP Servers ---
 # Override or extend the agent's default MCP servers.

@@ -27,6 +27,7 @@ def notify(notify_config: dict[str, Any], project_config: dict[str, Any], result
         return False
 
     channels = notify_config.get("channels", ["telegram", "slack"])
+    triggered_by = notify_config.get("triggered_by", "Forge")
     is_error = result.get("is_error", False)
 
     # Format numbers cleanly
@@ -49,6 +50,7 @@ def notify(notify_config: dict[str, Any], project_config: dict[str, Any], result
         "status": "failed" if is_error else "done",
         "cost_usd": cost_str,
         "duration": duration_str,
+        "triggered_by": triggered_by,
         "result_summary": _truncate(result.get("result", ""), 300),
     }
 
