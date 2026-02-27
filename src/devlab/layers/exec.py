@@ -62,9 +62,9 @@ def configure_git(
 
     if token:
         lines.extend([
-            'echo "https://x-access-token:${GITHUB_TOKEN}@github.com" > ~/.git-credentials',
+            f'echo "https://x-access-token:{token}@github.com" > ~/.git-credentials',
             "git config --global credential.helper store",
-            'echo "${GITHUB_TOKEN}" | gh auth login --with-token 2>/dev/null || true',
+            f'echo "{token}" | gh auth login --with-token 2>/dev/null || true',
         ])
 
     result = _docker_exec(container, " && ".join(lines))

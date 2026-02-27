@@ -1,0 +1,29 @@
+# Test: verify agent can branch, commit, push, and open a GitHub PR
+name: test-github-pr
+repo: https://github.com/kimwwk/our-pot-app.git
+toolchain: node
+agent: developer
+model: haiku
+timeout: 180
+port: 8890
+
+task: |
+  This is a smoke test to verify git credentials and GitHub PR workflow.
+
+  1. Create a new branch named test/devlab-pr-check
+  2. Add a file called DEVLAB_PR_TEST.md with the content:
+     "This PR was created by DevLab to verify the git push and PR workflow."
+  3. Commit with message: "test: verify devlab PR workflow"
+  4. Push the branch to origin
+  5. Open a pull request using `gh pr create` with:
+     - Title: "test: DevLab PR workflow check"
+     - Body: "Automated smoke test — safe to close."
+  6. After the PR is created, print the PR URL so it appears in the result summary.
+
+  If any step fails, print the exact error so we can diagnose credentials or permissions.
+
+notify:
+  webhook: http://192.168.101.130:5678/webhook/devlab-task-done
+  channels:
+    - slack
+  triggered_by: Forge
