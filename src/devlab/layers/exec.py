@@ -2,6 +2,7 @@
 
 import json
 import subprocess
+import tempfile
 from typing import Any, Optional
 
 
@@ -139,6 +140,65 @@ def setup_mcp(container: str, mcp_config: dict[str, Any]) -> None:
     print(f"MCP config written to {config_file}")
 
 
+def _save_jsonl(raw_stdout: str) -> str | None:
+    """Save raw stream-json stdout to a temp file.
+
+    Args:
+        raw_stdout: Full stdout from claude CLI with stream-json format
+
+    Returns:
+        Path to temp file, or None if stdout is empty
+    """
+    if not raw_stdout or not raw_stdout.strip():
+        return None
+
+    tmp = tempfile.NamedTemporaryFile(
+        mode="w", suffix=".jsonl", prefix="devlab_", delete=False
+    )
+    tmp.write(raw_stdout)
+    tmp.close()
+    return tmp.name
+
+
+def _parse_stream_json_result(raw_stdout: str) -> dict[str, Any]:
+    """Extract the result dict from stream-json output.
+
+    Walks backward through lines to find the last line with type "result".
+    Returns a result dict matching the shape of json output format.
+
+    Args:
+        raw_stdout: Full stdout from claude CLI with stream-json format
+
+    Returns:
+        Parsed result dict
+    """
+    if not raw_stdout:
+        return {
+            "type": "result",
+            "subtype": "error",
+            "is_error": True,
+            "result": "No output from agent",
+        }
+
+    for line in reversed(raw_stdout.strip().splitlines()):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            data = json.loads(line)
+            if data.get("type") == "result":
+                return data
+        except json.JSONDecodeError:
+            continue
+
+    return {
+        "type": "result",
+        "subtype": "error",
+        "is_error": True,
+        "result": raw_stdout[:500],
+    }
+
+
 def invoke_agent(
     container: str,
     task: str,
@@ -147,7 +207,7 @@ def invoke_agent(
     disallowed_tools: Optional[list[str]] = None,
     mcp_config_path: Optional[str] = "/home/gem/.claude/mcp.json",
     workdir: str = "/home/gem/project",
-    output_format: str = "json",
+    output_format: str = "stream-json",
     timeout: int = 600,
 ) -> dict[str, Any]:
     """Invoke Claude Code CLI inside container.
@@ -175,6 +235,7 @@ def invoke_agent(
         "claude",
         "--dangerously-skip-permissions",
         "--output-format", output_format,
+        "--verbose",
         "--model", model,
     ]
 
@@ -212,7 +273,13 @@ def invoke_agent(
     )
 
     # Parse output
-    if output_format == "json":
+    if output_format == "stream-json":
+        parsed = _parse_stream_json_result(result.stdout)
+        jsonl_path = _save_jsonl(result.stdout)
+        if jsonl_path:
+            parsed["_jsonl_path"] = jsonl_path
+        return parsed
+    elif output_format == "json":
         try:
             return json.loads(result.stdout)
         except json.JSONDecodeError:

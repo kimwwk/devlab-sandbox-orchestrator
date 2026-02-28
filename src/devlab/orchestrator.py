@@ -1,5 +1,6 @@
 """Core orchestration logic for Dev Lab."""
 
+import os
 from typing import Any
 
 from .config import load_project, get_agent, get_env_vars
@@ -8,6 +9,7 @@ from .layers import build_image, start_container, stop_container, is_running
 from .layers.build import get_image_tag
 from .layers.exec import configure_git, clone_repo, setup_mcp, invoke_agent
 from . import callback
+from . import reports
 
 REPORT_INSTRUCTION = """
 
@@ -95,6 +97,8 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
     # Container name based on project
     container_name = f"devlab-{name}"
 
+    jsonl_path = None
+
     try:
         # Layer 1: Build image
         print("\n=== Layer 1: Build ===")
@@ -144,6 +148,9 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
             timeout=timeout,
         )
 
+        # Extract JSONL path before downstream use
+        jsonl_path = result.pop("_jsonl_path", None)
+
         print("\n=== Result ===")
         if result.get("is_error"):
             print(f"Task failed: {result.get('result', 'Unknown error')}")
@@ -160,9 +167,21 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
             print("\n=== Notify ===")
             callback.notify(notify_config, project_config, result)
 
+        # Publish report
+        if jsonl_path:
+            print("\n=== Report ===")
+            reports.publish(jsonl_path, project_config, result)
+
         return result
 
     finally:
+        # Cleanup temp JSONL file
+        if jsonl_path:
+            try:
+                os.unlink(jsonl_path)
+            except OSError:
+                pass
+
         if cleanup:
             print("\n=== Cleanup ===")
             stop_container(container_name)

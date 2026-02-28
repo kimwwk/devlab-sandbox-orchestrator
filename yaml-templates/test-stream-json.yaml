@@ -1,0 +1,11 @@
+# Test: capture stream-json output to validate report feasibility
+name: test-stream-json
+repo: https://github.com/kimwwk/our-pot-app.git
+toolchain: node
+agent: developer
+model: haiku
+timeout: 120
+port: 8891
+
+task: |
+  List the files in the root of this project and summarize what this project is about in 2 sentences. That's it, nothing else.

@@ -131,3 +131,21 @@ Your repository (cloned inside container)
 | 1. Build | `docker build` | Toolchain image (Claude Code, node/python) |
 | 2. Start | `docker run` | Container with credentials |
 | 3. Exec | `docker exec` | Clone repo, setup MCP, invoke agent |
+
+## Future possibility 
+
+- [x] Linear-Driven Task Execution
+  - Agent queries Linear for assigned task (instead of YAML task field)
+  - Uses Linear MCP tools we just validated
+  - Agent posts result as Linear comment
+  - Updates issue status (in progress → done)
+- [ ] npm install did it first in setup
+- [ ] refine different roles in each agent and have clear boundaries
+- [ ] allow kick start the claude code idea grooming with agent team too
+- [ ] HTML Reports
+  - Capture --output-format stream-json
+  - Feed into HTML generator
+  - Port html_generator.py from PoC
+  - Generate report after each run for human review
+- [ ] monitor token usage
+  - need to avoid over long time running.
