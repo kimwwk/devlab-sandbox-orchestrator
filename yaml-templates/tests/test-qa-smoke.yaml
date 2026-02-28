@@ -1,0 +1,19 @@
+name: our-pot-app-qa
+repo: https://github.com/kimwwk/our-pot-qa.git
+toolchain: node
+
+agent: qa
+model: sonnet
+timeout: 300
+
+task: |
+  Run the smoke tests in this repository against the deployed application.
+
+  Steps:
+  1. Install dependencies with `npm install`
+  2. Install Playwright browsers with `npx playwright install --with-deps chromium`
+  3. Run smoke tests: `npm run test:smoke`
+  4. Report the results — which tests passed, which failed, and any errors.
+
+project_env:
+  BASE_URL: https://our-pot-app-git-develop-kimwongwwk-gmailcoms-projects.vercel.app

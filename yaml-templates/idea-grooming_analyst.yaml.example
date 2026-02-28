@@ -1,0 +1,11 @@
+name: idea-grooming
+repo: https://github.com/kimwwk/idea-grooming.git
+toolchain: node
+agent: analyst
+
+task: |
+  Run the idea-attack protocol on the "ai-aquarium" idea.
+  Follow the instructions in .claude/protocols/idea-attack.md.
+
+model: sonnet
+timeout: 900

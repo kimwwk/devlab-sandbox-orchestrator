@@ -28,36 +28,13 @@ AGENTS: dict[str, dict[str, Any]] = {
     },
     "qa": {
         "name": "qa",
-        "description": "QA agent restricted to test files only",
-        "model": "haiku",
-        "tools": None,  # All tools, but with restrictions via disallowed
-        "disallowed_tools": None,  # Use hooks for path-based restrictions
+        "description": "QA agent with its own test repository",
+        "model": "sonnet",
+        "tools": None,
+        "disallowed_tools": None,
         "mcp_servers": DEFAULT_MCP_SERVERS,
-        "hooks": {
-            "PreToolUse": [
-                {
-                    "matcher": "Write|Edit",
-                    "hooks": [
-                        {
-                            "type": "command",
-                            "command": "bash -c 'echo $TOOL_INPUT | jq -r .file_path | grep -qE \"/(tests?|__tests__|cypress|playwright)/\" || (echo \"QA can only write to test directories\" >&2 && exit 2)'",
-                            "timeout": 5
-                        }
-                    ]
-                },
-                {
-                    "matcher": "Bash",
-                    "hooks": [
-                        {
-                            "type": "command",
-                            "command": "bash -c 'echo $TOOL_INPUT | jq -r .command | grep -qvE \"npm (run dev|start)|yarn (dev|start)|serve|http-server\" || (echo \"QA cannot start dev servers\" >&2 && exit 2)'",
-                            "timeout": 5
-                        }
-                    ]
-                }
-            ]
-        },
-        "system_prompt_append": "You are a QA engineer. Focus on testing and validation. Do not modify source code outside of test directories.",
+        "hooks": None,
+        "system_prompt_append": None,
     },
     "reviewer": {
         "name": "reviewer",

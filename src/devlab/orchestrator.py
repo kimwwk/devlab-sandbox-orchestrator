@@ -7,7 +7,7 @@ from .config import load_project, get_agent, get_env_vars
 from .config.agents import merge_agent_config
 from .layers import build_image, start_container, stop_container, is_running
 from .layers.build import get_image_tag
-from .layers.exec import configure_git, clone_repo, setup_mcp, invoke_agent
+from .layers.exec import configure_git, clone_repo, write_dotenv, setup_mcp, invoke_agent
 from . import callback
 from . import reports
 
@@ -81,7 +81,7 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
     task = compose_task_prompt(project_config)
     port = project_config.get("port", 8888)
 
-    # Get environment variables
+    # Get system environment variables
     env = get_env_vars()
 
     # Get agent configuration
@@ -131,6 +131,11 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
             container=container_name,
             repo_url=repo,
         )
+
+        # Write project-specific env vars as .env in project root
+        project_env = project_config.get("project_env", {})
+        if project_env:
+            write_dotenv(container_name, project_env)
 
         # Setup MCP
         if agent.get("mcp_servers"):

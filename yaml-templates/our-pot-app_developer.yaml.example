@@ -1,0 +1,24 @@
+name: our-pot-app
+repo: https://github.com/kimwwk/our-pot-app.git
+toolchain: node
+agent: developer
+
+linear_issue: "OUR-90"
+
+model: sonnet
+port: 8888
+
+# project_env:
+#   DATABASE_URL: postgres://localhost:5432/mydb
+
+notify:
+  webhook: http://192.168.101.130:5678/webhook/devlab-task-done
+  channels:
+    - slack
+
+mcp_servers:
+  linear:
+    command: "npx"
+    args: ["-y", "mcp-remote", "https://mcp.linear.app/mcp", "--header", "Authorization:${AUTH_HEADER}"]
+    env:
+      AUTH_HEADER: "Bearer YOUR_LINEAR_API_KEY_HERE"

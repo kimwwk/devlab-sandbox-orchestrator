@@ -28,10 +28,10 @@ linear_issue: "OUR-123"
 
 # --- Agent Role ---
 # Available: developer, qa, reviewer, analyst
-# - developer: full access + browser, creates feature branch + PR (default)
-# - qa: test-only + browser, writes tests, cannot modify source code
+# - developer: full access + browser, clones product repo, ships PRs (default)
+# - qa: full access + browser, clones dedicated test repo, runs tests against deployed URL
 # - reviewer: read-only, provides code review feedback
-# - analyst: full access, no browser — reads its own instructions from the repo
+# - analyst: full access, no browser — research and analysis tasks
 agent: developer
 
 # --- Optional Overrides ---
@@ -47,6 +47,18 @@ toolchain: node
 # Access VNC at http://localhost:<port>/vnc/index.html
 # Access VSCode at http://localhost:<port>/code-server/
 port: 8888
+
+# Timeout in seconds (default: 600)
+timeout: 600
+
+# --- Project Environment ---
+# Key-value pairs written as .env file in the project root inside the container.
+# Separate from system env (ANTHROPIC_API_KEY, GITHUB_TOKEN) which are injected
+# at the container level via docker run -e.
+# project_env:
+#   BASE_URL: https://my-app.vercel.app          # QA: deployed link for tests
+#   DATABASE_URL: postgres://localhost:5432/mydb  # Dev: database connection
+#   NEXT_PUBLIC_API_KEY: sk-xxx                   # Dev: app config
 
 # --- Notification ---
 # Webhook called when task completes

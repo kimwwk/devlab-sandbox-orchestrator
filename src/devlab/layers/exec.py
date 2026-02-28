@@ -78,6 +78,32 @@ def configure_git(
         print("Git configured: identity only (no token)")
 
 
+def write_dotenv(
+    container: str,
+    env_vars: dict[str, str],
+    path: str = "/home/gem/project/.env",
+) -> None:
+    """Write a .env file inside the container.
+
+    Args:
+        container: Container name
+        env_vars: Key-value pairs to write
+        path: Destination path inside container
+    """
+    if not env_vars:
+        return
+
+    lines = [f"{key}={value}" for key, value in env_vars.items()]
+    content = "\n".join(lines) + "\n"
+
+    result = _docker_exec(container, f"cat > {path} << 'DOTENV_EOF'\n{content}DOTENV_EOF")
+
+    if result.returncode != 0:
+        print(f".env write warning: {result.stderr.strip()}")
+    else:
+        print(f".env written to {path} ({len(env_vars)} vars)")
+
+
 def clone_repo(
     container: str,
     repo_url: str,

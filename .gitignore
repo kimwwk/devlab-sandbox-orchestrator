@@ -4,4 +4,4 @@ google-chrome-stable_current_amd64.deb
 __pycache__
 yaml-templates/*
 !yaml-templates/*.example
-!yaml-templates/test-*
+!yaml-templates/tests/

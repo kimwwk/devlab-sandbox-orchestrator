@@ -140,9 +140,9 @@ Your repository (cloned inside container)
   - Agent posts result as Linear comment
   - Updates issue status (in progress → done)
 - [ ] npm install did it first in setup
-- [ ] refine different roles in each agent and have clear boundaries
-- [ ] allow kick start the claude code idea grooming with agent team too
-- [ ] HTML Reports
+- [x] refine different roles in each agent and have clear boundaries
+- [x] allow kick start the claude code idea grooming with agent team too
+- [x] HTML Reports
   - Capture --output-format stream-json
   - Feed into HTML generator
   - Port html_generator.py from PoC
