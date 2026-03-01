@@ -7,7 +7,7 @@ from .config import load_project, get_agent, get_env_vars
 from .config.agents import merge_agent_config
 from .layers import build_image, start_container, stop_container, is_running
 from .layers.build import get_image_tag
-from .layers.exec import configure_git, clone_repo, write_dotenv, setup_mcp, invoke_agent
+from .layers.exec import configure_git, clone_repo, write_dotenv, run_setup, setup_mcp, invoke_agent
 from . import callback
 from . import reports
 
@@ -136,6 +136,11 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
         project_env = project_config.get("project_env", {})
         if project_env:
             write_dotenv(container_name, project_env)
+
+        # Run setup command (e.g. npm install)
+        setup_command = project_config.get("setup_command")
+        if setup_command:
+            run_setup(container_name, setup_command)
 
         # Setup MCP
         if agent.get("mcp_servers"):

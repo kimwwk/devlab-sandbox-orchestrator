@@ -48,6 +48,7 @@ def load_project(config_path: str) -> dict[str, Any]:
     config.setdefault("notify", None)
     config.setdefault("timeout", 600)
     config.setdefault("project_env", {})
+    config.setdefault("setup_command", None)
 
     return config
 

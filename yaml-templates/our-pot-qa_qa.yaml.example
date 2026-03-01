@@ -9,6 +9,8 @@ model: sonnet
 port: 8888
 timeout: 300
 
+setup_command: npm install && npx playwright install --with-deps chromium
+
 project_env:
   BASE_URL: https://our-pot-app-git-develop-kimwongwwk-gmailcoms-projects.vercel.app
 

@@ -104,6 +104,30 @@ def write_dotenv(
         print(f".env written to {path} ({len(env_vars)} vars)")
 
 
+def run_setup(
+    container: str,
+    command: str,
+    workdir: str = "/home/gem/project",
+) -> None:
+    """Run a setup command inside the container.
+
+    Args:
+        container: Container name
+        command: Shell command to run (e.g. "npm install && npx playwright install")
+        workdir: Working directory inside container
+
+    Raises:
+        RuntimeError: If setup command fails
+    """
+    print(f"Running setup: {command}")
+    result = _docker_exec(container, command, workdir=workdir)
+
+    if result.returncode != 0:
+        raise RuntimeError(f"Setup command failed: {result.stderr.strip()}")
+
+    print("Setup complete")
+
+
 def clone_repo(
     container: str,
     repo_url: str,

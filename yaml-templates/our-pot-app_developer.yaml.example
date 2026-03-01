@@ -8,6 +8,8 @@ linear_issue: "OUR-90"
 model: sonnet
 port: 8888
 
+setup_command: npm install
+
 # project_env:
 #   DATABASE_URL: postgres://localhost:5432/mydb
 

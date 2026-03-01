@@ -51,6 +51,13 @@ port: 8888
 # Timeout in seconds (default: 600)
 timeout: 600
 
+# --- Setup Command ---
+# Shell command to run after cloning the repo, before the agent starts.
+# Use for dependency installation, build steps, browser setup, etc.
+# setup_command: npm install
+# setup_command: npm install && npx playwright install --with-deps chromium
+# setup_command: uv sync
+
 # --- Project Environment ---
 # Key-value pairs written as .env file in the project root inside the container.
 # Separate from system env (ANTHROPIC_API_KEY, GITHUB_TOKEN) which are injected
