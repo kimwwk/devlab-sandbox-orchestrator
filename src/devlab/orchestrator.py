@@ -7,7 +7,8 @@ from .config import load_project, get_agent, get_env_vars
 from .config.agents import merge_agent_config
 from .layers import build_image, start_container, stop_container, is_running
 from .layers.build import get_image_tag
-from .layers.exec import configure_git, clone_repo, write_dotenv, run_setup, setup_mcp, invoke_agent
+from .layers.exec import configure_git, clone_repo, write_dotenv, run_setup, setup_mcp, invoke_agent, set_container_deadline
+from ._state import set_active_container, clear_active_container, write_pidfile, remove_pidfile
 from . import callback
 from . import reports
 
@@ -117,6 +118,10 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
                 port=port,
             )
 
+        # Register container for signal-safe cleanup
+        set_active_container(container_name)
+        write_pidfile(container_name)
+
         # Layer 3: Exec
         print("\n=== Layer 3: Exec ===")
 
@@ -148,6 +153,10 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
 
         # Invoke agent
         timeout = project_config.get("timeout", 600)
+
+        # Safety net: container self-destructs if host process dies
+        set_container_deadline(container_name, timeout)
+
         result = invoke_agent(
             container=container_name,
             task=task,
@@ -195,6 +204,9 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
         if cleanup:
             print("\n=== Cleanup ===")
             stop_container(container_name)
+
+        clear_active_container()
+        remove_pidfile(container_name)
 
 
 def run_from_file(config_path: str, cleanup: bool = True) -> dict[str, Any]:

@@ -8,6 +8,8 @@ Usage:
 """
 
 import argparse
+import os
+import signal
 import sys
 
 from dotenv import load_dotenv
@@ -16,6 +18,32 @@ load_dotenv()
 from .orchestrator import run_from_file
 from .layers.build import build_image, list_images, get_image_tag, image_exists
 from .layers.start import stop_container, is_running
+
+# --- Signal-safe container cleanup ---
+
+from ._state import get_active_container
+
+
+def _cleanup_on_signal(signum: int, frame) -> None:
+    """Handle SIGHUP/SIGTERM by stopping the active container, then exiting."""
+    container = get_active_container()
+    if container:
+        try:
+            stop_container(container)
+        except Exception:
+            pass  # Best-effort cleanup
+    sys.exit(128 + signum)
+
+
+def _install_signal_handlers() -> None:
+    """Install signal handlers for graceful shutdown.
+
+    SIGHUP: sent when terminal closes (the & backgrounding problem).
+    SIGTERM: sent by kill, systemd, docker stop, etc.
+    SIGINT: already raises KeyboardInterrupt which triggers finally blocks.
+    """
+    signal.signal(signal.SIGHUP, _cleanup_on_signal)
+    signal.signal(signal.SIGTERM, _cleanup_on_signal)
 
 
 def cmd_run(args: argparse.Namespace) -> int:
@@ -69,6 +97,31 @@ def cmd_stop(args: argparse.Namespace) -> int:
         return 1
 
 
+def _is_pid_alive(pid: int) -> bool:
+    """Check if a process with the given PID is alive."""
+    try:
+        os.kill(pid, 0)
+        return True
+    except (OSError, ProcessLookupError):
+        return False
+
+
+def _check_orphaned(container_name: str) -> bool:
+    """Check if a container's managing devlab process is dead.
+
+    Returns True if the pidfile exists but the process is gone.
+    """
+    pidfile = f"/tmp/{container_name}.pid"
+    if not os.path.exists(pidfile):
+        return False  # No pidfile = can't tell, assume not orphaned
+    try:
+        with open(pidfile) as f:
+            pid = int(f.read().strip())
+        return not _is_pid_alive(pid)
+    except (ValueError, OSError):
+        return True  # Corrupt pidfile = likely orphaned
+
+
 def cmd_list(args: argparse.Namespace) -> int:
     """List devlab resources."""
     print("Images:")
@@ -88,7 +141,9 @@ def cmd_list(args: argparse.Namespace) -> int:
     )
     if result.stdout.strip():
         for line in result.stdout.strip().split("\n"):
-            print(f"  {line}")
+            name = line.split("\t")[0].strip()
+            suffix = "  (orphaned)" if _check_orphaned(name) else ""
+            print(f"  {line}{suffix}")
     else:
         print("  (none running)")
 
@@ -97,6 +152,8 @@ def cmd_list(args: argparse.Namespace) -> int:
 
 def main() -> int:
     """Main CLI entry point."""
+    _install_signal_handlers()
+
     parser = argparse.ArgumentParser(
         prog="devlab",
         description="Dev Lab - Runtime Orchestrator for AI agents",

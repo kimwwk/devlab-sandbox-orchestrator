@@ -39,6 +39,32 @@ def _docker_exec(
     )
 
 
+def set_container_deadline(container: str, timeout: int, buffer: int = 300) -> None:
+    """Start a background watchdog that stops the container after a deadline.
+
+    If the host devlab process dies (SIGKILL, OOM, etc.), the container
+    would run forever. This watchdog kills PID 1 (supervisord) after
+    timeout + buffer seconds, which triggers Docker's --rm auto-cleanup.
+
+    Args:
+        container: Container name
+        timeout: Task timeout in seconds
+        buffer: Extra seconds beyond timeout before self-destruct (default: 5 min)
+    """
+    deadline = timeout + buffer
+    # Run detached (-d) so it doesn't block and survives host disconnect
+    subprocess.run(
+        [
+            "docker", "exec", "-d",
+            container,
+            "bash", "-c",
+            f"sleep {deadline} && kill 1",
+        ],
+        capture_output=True,
+    )
+    print(f"Container deadline set: {deadline}s")
+
+
 def configure_git(
     container: str,
     token: Optional[str] = None,
