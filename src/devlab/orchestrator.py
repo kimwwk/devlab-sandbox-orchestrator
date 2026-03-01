@@ -152,7 +152,7 @@ def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
             setup_mcp(container_name, agent["mcp_servers"])
 
         # Invoke agent
-        timeout = project_config.get("timeout", 600)
+        timeout = project_config.get("timeout", 3600)
 
         # Safety net: container self-destructs if host process dies
         set_container_deadline(container_name, timeout)

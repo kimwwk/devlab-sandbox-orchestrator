@@ -48,8 +48,8 @@ toolchain: node
 # Access VSCode at http://localhost:<port>/code-server/
 port: 8888
 
-# Timeout in seconds (default: 600)
-timeout: 600
+# Timeout in seconds (default: 3600)
+timeout: 3600
 
 # --- Setup Command ---
 # Shell command to run after cloning the repo, before the agent starts.

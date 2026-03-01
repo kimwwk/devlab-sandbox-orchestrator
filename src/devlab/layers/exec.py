@@ -284,7 +284,7 @@ def invoke_agent(
     mcp_config_path: Optional[str] = "/home/gem/.claude/mcp.json",
     workdir: str = "/home/gem/project",
     output_format: str = "stream-json",
-    timeout: int = 600,
+    timeout: int = 3600,
 ) -> dict[str, Any]:
     """Invoke Claude Code CLI inside container.
 
