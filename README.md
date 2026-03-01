@@ -139,7 +139,8 @@ Your repository (cloned inside container)
   - Uses Linear MCP tools we just validated
   - Agent posts result as Linear comment
   - Updates issue status (in progress → done)
-- [ ] npm install did it first in setup
+- [x] setup_command for pre-agent dependency installation
+- [ ] Document agent roles clearly — what each role expects, repo structure, conventions
 - [x] refine different roles in each agent and have clear boundaries
 - [x] allow kick start the claude code idea grooming with agent team too
 - [x] HTML Reports
