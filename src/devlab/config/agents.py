@@ -19,6 +19,9 @@ AGENTS: dict[str, dict[str, Any]] = {
     "developer": {
         "name": "developer",
         "description": "Full-access developer agent for code implementation",
+        "use_when": "You need code written, bugs fixed, features implemented, or refactoring done.",
+        "expect": "Has full tool access including file editing, terminal, and browser. "
+                  "Will make changes to your codebase directly.",
         "model": "sonnet",
         "tools": None,  # All tools allowed
         "disallowed_tools": None,
@@ -28,7 +31,10 @@ AGENTS: dict[str, dict[str, Any]] = {
     },
     "qa": {
         "name": "qa",
-        "description": "QA agent with its own test repository",
+        "description": "QA agent for testing and validation",
+        "use_when": "You need tests written, test suites run, or quality validation performed.",
+        "expect": "Has full tool access with browser for E2E testing. "
+                  "Works in its own test repository to avoid interfering with dev work.",
         "model": "sonnet",
         "tools": None,
         "disallowed_tools": None,
@@ -38,9 +44,12 @@ AGENTS: dict[str, dict[str, Any]] = {
     },
     "reviewer": {
         "name": "reviewer",
-        "description": "Read-only reviewer agent for code review",
+        "description": "Code reviewer that posts feedback on PRs",
+        "use_when": "You want automated code review on a pull request or branch diff.",
+        "expect": "Reads code and searches the codebase but cannot edit files. "
+                  "Uses Bash to post review comments via gh CLI.",
         "model": "sonnet",
-        "tools": ["Read", "Glob", "Grep", "WebFetch", "WebSearch"],  # Read-only tools
+        "tools": ["Read", "Glob", "Grep", "Bash", "WebFetch", "WebSearch"],  # Read-only + Bash for posting PR comments
         "disallowed_tools": None,
         "mcp_servers": None,  # No browser needed for review
         "hooks": None,
@@ -48,7 +57,9 @@ AGENTS: dict[str, dict[str, Any]] = {
     },
     "analyst": {
         "name": "analyst",
-        "description": "Analysis orchestrator for protocol-driven multi-agent workflows",
+        "description": "Research and analysis agent for multi-agent workflows",
+        "use_when": "You need research, architectural analysis, or protocol-driven investigation.",
+        "expect": "Has full tool access. Follows instructions or protocols defined in the repository to carry out analysis.",
         "model": "sonnet",
         "tools": None,
         "disallowed_tools": None,

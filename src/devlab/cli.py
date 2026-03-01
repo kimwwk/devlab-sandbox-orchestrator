@@ -5,6 +5,7 @@ Usage:
     python -m devlab build <toolchain>      Build an image
     python -m devlab stop <container>       Stop a container
     python -m devlab list                   List running containers
+    python -m devlab agent [name]           Show available agent roles
 """
 
 import argparse
@@ -18,6 +19,7 @@ load_dotenv()
 from .orchestrator import run_from_file
 from .layers.build import build_image, list_images, get_image_tag, image_exists
 from .layers.start import stop_container, is_running
+from .config.agents import AGENTS
 
 # --- Signal-safe container cleanup ---
 
@@ -122,6 +124,43 @@ def _check_orphaned(container_name: str) -> bool:
         return True  # Corrupt pidfile = likely orphaned
 
 
+def cmd_agent(args: argparse.Namespace) -> int:
+    """Show agent information."""
+    name = args.name
+
+    if name:
+        # Show details for a specific agent
+        if name not in AGENTS:
+            available = ", ".join(AGENTS.keys())
+            print(f"Unknown agent '{name}'. Available: {available}")
+            return 1
+
+        agent = AGENTS[name]
+        print(f"\n  {agent['name']}")
+        print(f"  {agent['description']}")
+        print()
+        print(f"  When to use:    {agent.get('use_when', 'N/A')}")
+        print(f"  What to expect: {agent.get('expect', 'N/A')}")
+        print()
+        print(f"  Model:          {agent.get('model', 'default')}")
+        tools = agent.get("tools")
+        print(f"  Tools:          {', '.join(tools) if tools else 'all'}")
+        mcp = agent.get("mcp_servers")
+        print(f"  MCP servers:    {', '.join(mcp.keys()) if mcp else 'none'}")
+        print()
+        return 0
+
+    # List all agents
+    print("\nAvailable agents:\n")
+    for agent in AGENTS.values():
+        print(f"  {agent['name']:<12} {agent['description']}")
+        print(f"  {'':<12} Use when: {agent.get('use_when', 'N/A')}")
+        print()
+
+    print(f"Run 'devlab agent <name>' for full details.")
+    return 0
+
+
 def cmd_list(args: argparse.Namespace) -> int:
     """List devlab resources."""
     print("Images:")
@@ -176,6 +215,11 @@ def main() -> int:
     stop_parser = subparsers.add_parser("stop", help="Stop a container")
     stop_parser.add_argument("container", help="Container name or project name")
     stop_parser.set_defaults(func=cmd_stop)
+
+    # agent command
+    agent_parser = subparsers.add_parser("agent", help="Show available agent roles")
+    agent_parser.add_argument("name", nargs="?", default=None, help="Agent name for details")
+    agent_parser.set_defaults(func=cmd_agent)
 
     # list command
     list_parser = subparsers.add_parser("list", help="List devlab resources")

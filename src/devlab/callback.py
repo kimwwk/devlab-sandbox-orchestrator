@@ -51,16 +51,40 @@ def notify(notify_config: dict[str, Any], project_config: dict[str, Any], result
         "cost_usd": cost_str,
         "duration": duration_str,
         "triggered_by": triggered_by,
-        "result_summary": _truncate(result.get("result", ""), 300),
+        # Telegram limit is 4096 chars; header uses ~200, leave room
+        "result_summary": _truncate(result.get("result", ""), 1800),
     }
 
     return _post(webhook_url, payload)
 
 
 def _truncate(text: str, max_len: int) -> str:
+    """Truncate text at a natural boundary (paragraph, sentence, or word)."""
     if not text:
         return ""
-    return text[:max_len] + ("..." if len(text) > max_len else "")
+    text = text.strip()
+    if len(text) <= max_len:
+        return text
+
+    cut = text[:max_len]
+
+    # Try paragraph boundary (double newline) in the back half
+    pos = cut.rfind("\n\n", max_len // 2)
+    if pos > 0:
+        return cut[:pos].rstrip() + "\n..."
+
+    # Try sentence boundary
+    for end in (". ", ".\n", "! ", "!\n", "? ", "?\n"):
+        pos = cut.rfind(end, max_len // 2)
+        if pos > 0:
+            return cut[: pos + 1]
+
+    # Try word boundary
+    pos = cut.rfind(" ", max_len // 2)
+    if pos > 0:
+        return cut[:pos] + "..."
+
+    return cut + "..."
 
 
 def _post(url: str, payload: dict) -> bool:
