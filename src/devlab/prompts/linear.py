@@ -58,27 +58,30 @@ Before writing code, read any relevant project documentation (README, architectu
 - Follow existing patterns and conventions in the codebase — match the style you find
 - Keep changes focused on what the issue asks for — avoid scope creep
 - Write clear, descriptive commit messages
+- Write clear, descriptive PR description
 - Name feature branches as: feature/<issue-id>-<short-description>
 - Test your implementation before reporting completion
-- If the issue is ambiguous, make a reasonable decision and document it in your Linear comment
+- Use Linear to flag anything that needs others' attention. For example:
+    - If the issue is ambiguous, make a reasonable decision and document it
+    - If something outside your control prevents progress (unclear requirements, missing dependencies, architectural constraints, environment issues) — not a fixable error, comment on the Linear issue
+    - If you hit environment or tooling issues you'd like improved, raise a new issue with the "infra" label
 </soft-guidance>
 
 <task-instructions>
 Your goal is to complete Linear issue {issue_id}.
 
 Work autonomously:
-- Fetch the issue, understand it, then update its status to "In Progress"
+- Fetch the issue, understand it, then update its state to "Dev in Progress"
 - Create a feature branch, implement the solution in this repository
 - Test that your changes work — run linting, build, and any relevant tests
 - When complete, push the branch and open a Pull Request
-- Post a summary comment on the issue describing what you did, files changed, and any decisions made
-- Update the issue status to "Done"
 
-If you encounter a blocker that prevents completion:
-- Do NOT silently work around architectural constraints
-- Post a comment on the issue explaining what blocked you and why
-- Leave the status as "In Progress"
-- Stop working — do not attempt creative workarounds on blocked issues
+If you complete successfully and acceptance criteria are met:
+- Update the issue state to "Test in Progress" so QA can pick it up
+
+Otherwise:
+- Comment on the Linear issue explaining what blocked you and why
+- Add the "Blocked" label — keep state as "Dev in Progress"
 </task-instructions>
 """
 
@@ -110,17 +113,20 @@ Read the repository's README, docs, and any custom agent instructions (.claude/a
 
 <soft-guidance>
 - Run existing tests first before writing new ones
+- Keep changes focused on what the issue asks for — avoid scope creep
+- Write clear, descriptive commit messages
 - Follow the gate process defined in the repo (smoke → regression → critical)
 - If the issue requires new test coverage, add tests that follow existing patterns
-- Do not start development servers — tests run against the deployed BASE_URL
 - Commit and push new or updated tests so the test repo stays current
+- Use Linear to flag anything that needs others' attention. For example:
+    - If you cannot test something, comment explicitly what you can sign off and what your constraints are
 </soft-guidance>
 
 <task-instructions>
 Your goal is to validate the work described in Linear issue {issue_id}.
 
 Work autonomously:
-- Fetch the issue, understand what needs validation, then update its status to "In Progress"
+- Fetch the issue, understand what needs validation (the issue should already be in "Test in Progress")
 - Install dependencies and set up the test environment
 - Run the relevant test suites against the deployed application
 - If the issue requires new test coverage, write and run those tests
@@ -131,11 +137,11 @@ Work autonomously:
   - Recommendation (approve or block)
 
 If all tests pass and acceptance criteria are met:
-- Update the issue status to "Done"
+- Update the issue state to "Done"
 
-If tests fail or you find bugs:
-- Do NOT mark the issue as Done
-- Post a comment with detailed findings (steps to reproduce, expected vs actual)
-- Leave the status as "In Progress" so the developer can address the issues
+Otherwise, depending on the problem:
+- If the issue itself needs rework, move it back to "Dev in Progress" for the developer to pick up
+- If you found a separate bug, raise a new Linear issue with appropriate labels
+- In either case, comment with detailed findings (steps to reproduce, expected vs actual)
 </task-instructions>
 """
