@@ -1,0 +1,18 @@
+# Test: verify the python toolchain image builds and runs
+name: test-python-toolchain
+repo: https://github.com/pallets/flask.git
+toolchain: python
+agent: developer
+model: haiku
+timeout: 120
+port: 8892
+
+task: |
+  This is a smoke test for the python toolchain.
+
+  1. Verify python3 is available: run `python3 --version`
+  2. Verify uv is available: run `uv --version`
+  3. List the files in the root of this project
+  4. Summarize what this project is about in 2 sentences
+
+  Print the output of each command. If any tool is missing, report it clearly.

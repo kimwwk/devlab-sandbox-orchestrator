@@ -27,7 +27,6 @@ AGENTS: dict[str, dict[str, Any]] = {
         "disallowed_tools": None,
         "mcp_servers": DEFAULT_MCP_SERVERS,
         "hooks": None,  # No restrictions
-        "system_prompt_append": None,
     },
     "qa": {
         "name": "qa",
@@ -40,7 +39,32 @@ AGENTS: dict[str, dict[str, Any]] = {
         "disallowed_tools": None,
         "mcp_servers": DEFAULT_MCP_SERVERS,
         "hooks": None,
-        "system_prompt_append": None,
+    },
+    "dev-lead": {
+        "name": "dev-lead",
+        "description": "Developer lead with architectural awareness and design thinking",
+        "use_when": "You need implementation that also considers architecture, project structure, "
+                    "and design foundations — not just feature code.",
+        "expect": "Has full tool access including file editing, terminal, and browser. "
+                  "Will assess and improve codebase design as part of implementation.",
+        "model": "sonnet",
+        "tools": None,  # All tools allowed
+        "disallowed_tools": None,
+        "mcp_servers": DEFAULT_MCP_SERVERS,
+        "hooks": None,
+    },
+    "qa-lead": {
+        "name": "qa-lead",
+        "description": "QA lead with test strategy and infrastructure design thinking",
+        "use_when": "You need test work that also considers test architecture, coverage strategy, "
+                    "and test infrastructure setup — not just running existing tests.",
+        "expect": "Has full tool access with browser for E2E testing. "
+                  "Will assess and improve test structure as part of validation.",
+        "model": "sonnet",
+        "tools": None,
+        "disallowed_tools": None,
+        "mcp_servers": DEFAULT_MCP_SERVERS,
+        "hooks": None,
     },
     "reviewer": {
         "name": "reviewer",
@@ -53,7 +77,6 @@ AGENTS: dict[str, dict[str, Any]] = {
         "disallowed_tools": None,
         "mcp_servers": None,  # No browser needed for review
         "hooks": None,
-        "system_prompt_append": "You are a code reviewer. Analyze the code and provide feedback. Do not make any changes.",
     },
     "analyst": {
         "name": "analyst",
@@ -65,7 +88,6 @@ AGENTS: dict[str, dict[str, Any]] = {
         "disallowed_tools": None,
         "mcp_servers": None,
         "hooks": None,
-        "system_prompt_append": None,
     },
 }
 

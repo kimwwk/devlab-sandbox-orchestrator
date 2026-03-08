@@ -27,9 +27,11 @@ linear_issue: "OUR-123"
 #   Can be multi-line.
 
 # --- Agent Role ---
-# Available: developer, qa, reviewer, analyst
+# Available: developer, dev-lead, qa, qa-lead, reviewer, analyst
 # - developer: full access + browser, clones product repo, ships PRs (default)
+# - dev-lead: same as developer but with architectural awareness and design thinking
 # - qa: full access + browser, clones dedicated test repo, runs tests against deployed URL
+# - qa-lead: same as qa but with test strategy and infrastructure design thinking
 # - reviewer: read-only, provides code review feedback
 # - analyst: full access, no browser — research and analysis tasks
 agent: developer

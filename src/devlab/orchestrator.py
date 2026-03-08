@@ -8,37 +8,17 @@ from .config.agents import merge_agent_config
 from .layers import build_image, start_container, stop_container, is_running
 from .layers.build import get_image_tag
 from .layers.exec import configure_git, clone_repo, write_dotenv, run_setup, setup_mcp, invoke_agent, set_container_deadline
+from .prompts import compose_prompt
 from ._state import set_active_container, clear_active_container, write_pidfile, remove_pidfile
 from . import callback
 from . import reports
-
-REPORT_INSTRUCTION = """
-
-<completion-report>
-When you finish, end with a brief completion report in this exact format:
-
-## Status
-DONE or BLOCKED (one word)
-
-## What Changed
-- List each file changed and what was done (1 line per file)
-
-## Key Decisions
-- Any non-obvious choices you made and why (skip if none)
-
-## PR / Branch
-- Branch name and PR link if created (skip if none)
-
-Keep the report concise — a few bullet points, not paragraphs.
-</completion-report>
-"""
 
 
 def compose_task_prompt(project_config: dict[str, Any]) -> str:
     """Compose the task prompt for the agent.
 
-    If linear_issue is specified, compose a role-appropriate structured prompt.
-    Otherwise, use the literal task field.
+    Delegates to the per-role prompt module which handles both
+    Linear-driven and direct task prompts.
 
     Args:
         project_config: Project configuration from YAML
@@ -46,15 +26,13 @@ def compose_task_prompt(project_config: dict[str, Any]) -> str:
     Returns:
         Task prompt string
     """
+    agent_role = project_config.get("agent", "developer")
     linear_issue = project_config.get("linear_issue")
-    if linear_issue:
-        from .prompts.linear import compose_linear_prompt
-        agent_role = project_config.get("agent", "developer")
-        prompt = compose_linear_prompt(linear_issue, agent_role)
-    else:
-        prompt = project_config["task"]
 
-    return prompt + REPORT_INSTRUCTION
+    if linear_issue:
+        return compose_prompt(linear_issue, agent_role, source="linear")
+    else:
+        return compose_prompt(project_config["task"], agent_role, source="direct")
 
 
 def run(project_config: dict[str, Any], cleanup: bool = True) -> dict[str, Any]:
